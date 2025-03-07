@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'gdedeyne/datascientestapi_exam'
+        DOCKER_ID = 'gdedeyne'
         DOCKER_TAG = "latest"
     }
 
@@ -16,9 +16,18 @@ pipeline {
         }
 
         stage('Push to DockerHub') {
+            environment
+            {
+                DOCKER_PASS = credentials("DOCKER_HUB_PASS") 
+            }
+
             steps {
-                withDockerRegistry([credentialsId: 'DOCKER_HUB_PASS', url: '']) {
-                    sh 'docker-compose -f docker-compose.yml push'
+
+                script {
+                sh '''
+                docker login -u $DOCKER_ID -p $DOCKER_PASS
+                docker push $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG
+                '''
                 }
             }
         }
