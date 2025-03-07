@@ -58,13 +58,3 @@ pipeline {
             }
         }
     }
-
-    post {
-        success {
-            echo "Déploiement réussi"
-        }
-        failure {
-            echo "Echec"
-        }
-    }
-}
