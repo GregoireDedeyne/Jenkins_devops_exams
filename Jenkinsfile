@@ -6,6 +6,7 @@ pipeline {
         DOCKER_TAG = "latest"
     }
 
+    stages {
         stage('Build Docker Images') {
             steps {
                 script {
@@ -17,7 +18,7 @@ pipeline {
         stage('Push to DockerHub') {
             steps {
                 withDockerRegistry([credentialsId: 'DOCKER_HUB_PASS', url: '']) {
-                   sh 'docker-compose -f docker-compose.yml push'
+                    sh 'docker-compose -f docker-compose.yml push'
                 }
             }
         }
@@ -58,3 +59,4 @@ pipeline {
             }
         }
     }
+}
