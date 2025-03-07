@@ -7,12 +7,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout SCM') {
-            steps {
-                git branch: 'main', url: 'https://github.com/GregoireDedeyne/Jenkins_devops_exams'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t $DOCKER_IMAGE:$DOCKER_TAG ."
