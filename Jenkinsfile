@@ -15,23 +15,24 @@ pipeline {
             }
         }
 
-        stage('Push to DockerHub') {
-            environment
-            {
-                DOCKER_PASS = credentials("DOCKER_HUB_PASS") 
-            }
+stage('Push to DockerHub') {
+    environment {
+        DOCKER_PASS = credentials("DOCKER_HUB_PASS") 
+        DOCKER_ID = 'gdedeyne'
+        DOCKER_IMAGE = 'jenkins_exam_cast_service' 
+        DOCKER_TAG = 'latest' 
+    }
 
-            steps {
-
-                script {
-                sh '''
-                docker login -u $DOCKER_ID -p $DOCKER_PASS
-                docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_IMAGE:$DOCKER_TAG
-                docker push $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG
-                '''
-                }
-            }
+    steps {
+        script {
+            sh '''
+            echo $DOCKER_PASS | docker login -u $DOCKER_ID --password-stdin
+            docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG
+            docker push $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG
+            '''
         }
+    }
+}
 
         stage('Deploy to Dev') {
             steps {
