@@ -5,7 +5,9 @@ pipeline {
         DOCKER_ID = 'gdedeyne'
         DOCKER_TAG = 'latest'
     }
+
     stages {
+
         stage('Check Branch') {
             steps {
                 script {
@@ -14,8 +16,6 @@ pipeline {
                 }
             }
         }
-    }
-    stages {
         stage('Build Docker Images') {
             steps {
                 script {
@@ -23,6 +23,8 @@ pipeline {
                 }
             }
         }
+
+
 
         stage('Push to DockerHub') {
             environment {
