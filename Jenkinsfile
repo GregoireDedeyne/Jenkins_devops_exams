@@ -109,7 +109,7 @@ pipeline {
 
         stage('Deploiement en prod') {
             when {
-                branch 'master'
+                branch pattern: '^(master|main)$', comparator: 'REGEXP'
             }
             environment {
                 KUBECONFIG = credentials('config')
