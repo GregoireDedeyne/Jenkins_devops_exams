@@ -40,7 +40,7 @@ securityContext: {}
 service:
   type: NodePort
   port: 80
-  nodePort: {{ .Values.nodePort }}  
+  nodePort: 30007  
   targetPort: 8000
 
 ingress:
