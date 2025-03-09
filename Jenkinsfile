@@ -8,7 +8,7 @@ pipeline {
 
     stages {
 
-        stage('Check Branch') {
+        stage('get Branch') {
             steps {
                 script {
                     checkout scm  // Récupère les informations du dépôt
