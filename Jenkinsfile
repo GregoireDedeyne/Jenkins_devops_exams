@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_ID = 'gdedeyne'
-        DOCKER_TAG = 'latest' 
+        DOCKER_TAG = 'latest'
     }
 
     stages {
@@ -37,8 +37,8 @@ pipeline {
 
         stage('Deploiement en dev') {
             environment {
-                KUBECONFIG = credentials('config') 
-                DEPLOY_ENV = 'dev' 
+                KUBECONFIG = credentials('config')
+                DEPLOY_ENV = 'dev'
             }
             steps {
                 script {
@@ -65,8 +65,8 @@ pipeline {
 
         stage('Deploiement en QA') {
             environment {
-                KUBECONFIG = credentials('config') 
-                DEPLOY_ENV = 'qa' 
+                KUBECONFIG = credentials('config')
+                DEPLOY_ENV = 'qa'
             }
             steps {
                 script {
@@ -87,8 +87,8 @@ pipeline {
 
         stage('Deploiement en staging') {
             environment {
-                KUBECONFIG = credentials('config') 
-                DEPLOY_ENV = 'staging' 
+                KUBECONFIG = credentials('config')
+                DEPLOY_ENV = 'staging'
             }
             steps {
                 script {
@@ -107,31 +107,32 @@ pipeline {
             }
         }
 
-stage('Deploiement en prod') {
-    when {
-        branch 'master'  /
-    }
-    environment {
-        KUBECONFIG = credentials('config')  
-        DEPLOY_ENV = 'prod'  
-    }
-    steps {
-        timeout(time: 15, unit: "MINUTES") { 
-            input message: 'Do you want to deploy in production?', ok: 'Yes'  
-        }
-        script {
-            sh '''
-            rm -Rf .kube
-            mkdir .kube
-            ls
-            cat $KUBECONFIG > .kube/config
-            cp charts/values.yaml values.yml
-            cat values.yml
-            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-            sed -i "s+nodePort:.*+nodePort: 30010+g" values.yml  // Remplacement pour prod
-            helm upgrade --install app-${DEPLOY_ENV} ./charts --values=values.yml --namespace ${DEPLOY_ENV}
-            '''
-        }
+        stage('Deploiement en prod') {
+            when {
+                branch 'master'
+            }
+            environment {
+                KUBECONFIG = credentials('config')
+                DEPLOY_ENV = 'prod'
+            }
+            steps {
+                timeout(time: 15, unit: "MINUTES") {
+                    input message: 'Do you want to deploy in production?', ok: 'Yes'
+                }
+                script {
+                    sh '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    ls
+                    cat $KUBECONFIG > .kube/config
+                    cp charts/values.yaml values.yml
+                    cat values.yml
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                    sed -i "s+nodePort:.*+nodePort: 30010+g" values.yml  // Remplacement pour prod
+                    helm upgrade --install app-${DEPLOY_ENV} ./charts --values=values.yml --namespace ${DEPLOY_ENV}
+                    '''
+                }
+            }
         }
     }
 }
