@@ -109,13 +109,16 @@ pipeline {
 
         stage('Deploiement en prod') {
             when {
-                branch 'main'
+                branch 'master'
             }
             environment {
                 KUBECONFIG = credentials('config') 
                 DEPLOY_ENV = 'prod' 
             }
             steps {
+                                    timeout(time: 15, unit: "MINUTES") {
+                        input message: 'Do you want to deploy in production ?', ok: 'Yes'
+                    }
                 script {
                     sh '''
                     rm -Rf .kube
