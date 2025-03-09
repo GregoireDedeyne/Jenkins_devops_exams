@@ -106,7 +106,13 @@ pipeline {
                 }
             }
         }
-
+        stage('Check Branch') {
+            steps {
+                script {
+                    echo "Current branch is: ${env.BRANCH_NAME}"
+                }
+            }
+        }
         stage('Deploiement en prod') {
             when {
                 branch pattern: '^(master|main)$', comparator: 'REGEXP'
