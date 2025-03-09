@@ -3,8 +3,7 @@ pipeline {
 
     environment {
         DOCKER_ID = 'gdedeyne'
-        DOCKER_TAG = 'latest'
-        NODE_PORT = "30007" 
+        DOCKER_TAG = 'latest' 
     }
 
     stages {
@@ -36,24 +35,6 @@ pipeline {
             }
         }
 
-        stage('Set NODE_PORT based on DEPLOY_ENV') {
-            steps {
-                script {
-                
-                    if (env.DEPLOY_ENV == 'dev') {
-                        env.NODE_PORT = "30007"
-                    } else if (env.DEPLOY_ENV == 'qa') {
-                        env.NODE_PORT = "30008"
-                    } else if (env.DEPLOY_ENV == 'staging') {
-                        env.NODE_PORT = "30009"
-                    } else if (env.DEPLOY_ENV == 'prod') {
-                        env.NODE_PORT = "30010"
-                    }
-                    echo "Le port Node est maintenant : ${env.NODE_PORT}"
-                }
-            }
-        }
-
         stage('Deploiement en dev') {
             environment {
                 KUBECONFIG = credentials('config') 
@@ -69,8 +50,8 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    sed -i "s+nodePort:.*+nodePort: ${NODE_PORT}+g" values.yml
-                    helm upgrade --install app-dev ./charts --values=values.yml --namespace dev
+                    sed -i "s+nodePort:.*+nodePort: 30007+g" values.yml
+                    helm upgrade --install app-${DEPLOY_ENV} ./charts --values=values.yml --namespace ${DEPLOY_ENV}
                     '''
                 }
             }
@@ -97,8 +78,8 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    sed -i "s+nodePort:.*+nodePort: ${NODE_PORT}+g" values.yml
-                    helm upgrade --install app-qa ./charts --values=values.yml --namespace qa
+                    sed -i "s+nodePort:.*+nodePort: 30008+g" values.yml
+                    helm upgrade --install app-${DEPLOY_ENV} ./charts --values=values.yml --namespace ${DEPLOY_ENV}
                     '''
                 }
             }
@@ -119,8 +100,8 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    sed -i "s+nodePort:.*+nodePort: ${NODE_PORT}+g" values.yml
-                    helm upgrade --install app-staging ./charts --values=values.yml --namespace staging
+                    sed -i "s+nodePort:.*+nodePort: 30009+g" values.yml
+                    helm upgrade --install app-${DEPLOY_ENV} ./charts --values=values.yml --namespace ${DEPLOY_ENV}
                     '''
                 }
             }
@@ -144,8 +125,8 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    sed -i "s+nodePort:.*+nodePort: ${NODE_PORT}+g" values.yml
-                    helm upgrade --install app-prod ./charts --values=values.yml --namespace prod
+                    sed -i "s+nodePort:.*+nodePort: 30010+g" values.yml
+                    helm upgrade --install app-${DEPLOY_ENV} ./charts --values=values.yml --namespace ${DEPLOY_ENV}
                     '''
                 }
             }
