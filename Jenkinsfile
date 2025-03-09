@@ -26,10 +26,10 @@ pipeline {
                 script {
                     sh '''
                     echo $DOCKER_PASS | docker login -u $DOCKER_ID --password-stdin
-                    docker tag movie_service:latest $DOCKER_ID/movie_service:$DOCKER_TAG
+                    docker tag jenkins_exam_movie_service:latest $DOCKER_ID/movie_service:$DOCKER_TAG
                     docker push $DOCKER_ID/movie_service:$DOCKER_TAG
 
-                    docker tag cast_service:latest $DOCKER_ID/cast_service:$DOCKER_TAG
+                    docker tag jenkins_exam_cast_service:latest $DOCKER_ID/cast_service:$DOCKER_TAG
                     docker push $DOCKER_ID/cast_service:$DOCKER_TAG
                     '''
                 }
