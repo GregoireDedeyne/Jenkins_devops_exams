@@ -15,23 +15,26 @@ pipeline {
             }
         }
 
-        stage('Push to DockerHub') {
+
+         stage('Push to DockerHub') {
             environment {
                 DOCKER_PASS = credentials('DOCKER_HUB_PASS')
                 DOCKER_ID = 'gdedeyne'
-                DOCKER_IMAGE = 'jenkins_exam_cast_service'
                 DOCKER_TAG = 'latest'
             }
             steps {
                 script {
                     sh '''
                     echo $DOCKER_PASS | docker login -u $DOCKER_ID --password-stdin
-                    docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG
-                    docker push $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG
+                    docker tag movie_service:latest $DOCKER_ID/movie_service:$DOCKER_TAG
+                    docker push $DOCKER_ID/movie_service:$DOCKER_TAG
+
+                    docker tag cast_service:latest $DOCKER_ID/cast_service:$DOCKER_TAG
+                    docker push $DOCKER_ID/cast_service:$DOCKER_TAG
                     '''
                 }
             }
-        }
+        }       
 
         stage('Deploiement en dev') {
             environment {
@@ -47,7 +50,7 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app app-dev --values=values.yml --namespace dev
+                    helm upgrade --install app-dev --values=values.yml --namespace dev
                     '''
                 }
             }
@@ -73,7 +76,7 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app app-qa --values=values.yml --namespace qa
+                    helm upgrade --install app-qa --values=values.yml --namespace qa
                     '''
                 }
             }
@@ -93,7 +96,7 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app app-staging --values=values.yml --namespace staging
+                    helm upgrade --install app-staging --values=values.yml --namespace staging
                     '''
                 }
             }
@@ -116,7 +119,7 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app app-staging --values=values.yml --namespace staging
+                    helm upgrade --install app-staging --values=values.yml --namespace staging
                     '''
                 }
             }
