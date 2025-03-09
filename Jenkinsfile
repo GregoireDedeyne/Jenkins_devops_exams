@@ -11,7 +11,7 @@ pipeline {
         stage('get Branch') {
             steps {
                 script {
-                    checkout scm  // Récupère les informations du dépôt
+                    checkout scm  
                     echo "Current branch is: ${env.GIT_BRANCH}"
                 }
             }
@@ -139,7 +139,7 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    sed -i "s+nodePort:.*+nodePort: 30010+g" values.yml  // Remplacement pour prod
+                    sed -i "s+nodePort:.*+nodePort: 30010+g" values.yml
                     helm upgrade --install app-${DEPLOY_ENV} ./charts --values=values.yml --namespace ${DEPLOY_ENV}
                     '''
                 }
