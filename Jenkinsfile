@@ -5,7 +5,16 @@ pipeline {
         DOCKER_ID = 'gdedeyne'
         DOCKER_TAG = 'latest'
     }
-
+    stages {
+        stage('Check Branch') {
+            steps {
+                script {
+                    checkout scm  // Récupère les informations du dépôt
+                    echo "Current branch is: ${env.GIT_BRANCH}"
+                }
+            }
+        }
+    }
     stages {
         stage('Build Docker Images') {
             steps {
