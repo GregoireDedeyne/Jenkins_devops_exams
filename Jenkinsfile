@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_ID = 'gdedeyne'
         DOCKER_TAG = 'latest'
+        NODE_PORT = "30007" 
     }
 
     stages {
@@ -15,8 +16,7 @@ pipeline {
             }
         }
 
-
-         stage('Push to DockerHub') {
+        stage('Push to DockerHub') {
             environment {
                 DOCKER_PASS = credentials('DOCKER_HUB_PASS')
                 DOCKER_ID = 'gdedeyne'
@@ -34,11 +34,30 @@ pipeline {
                     '''
                 }
             }
-        }       
+        }
+
+        stage('Set NODE_PORT based on DEPLOY_ENV') {
+            steps {
+                script {
+                
+                    if (env.DEPLOY_ENV == 'dev') {
+                        env.NODE_PORT = "30007"
+                    } else if (env.DEPLOY_ENV == 'qa') {
+                        env.NODE_PORT = "30008"
+                    } else if (env.DEPLOY_ENV == 'staging') {
+                        env.NODE_PORT = "30009"
+                    } else if (env.DEPLOY_ENV == 'prod') {
+                        env.NODE_PORT = "30010"
+                    }
+                    echo "Le port Node est maintenant : ${env.NODE_PORT}"
+                }
+            }
+        }
 
         stage('Deploiement en dev') {
             environment {
-                KUBECONFIG = credentials('config') // We retrieve kubeconfig from secret file called config saved on Jenkins
+                KUBECONFIG = credentials('config') 
+                DEPLOY_ENV = 'dev' 
             }
             steps {
                 script {
@@ -50,6 +69,7 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                    sed -i "s+nodePort:.*+nodePort: ${NODE_PORT}+g" values.yml
                     helm upgrade --install app-dev ./charts --values=values.yml --namespace dev
                     '''
                 }
@@ -62,9 +82,10 @@ pipeline {
             }
         }
 
-        stage('Deploiement en qa') {
+        stage('Deploiement en QA') {
             environment {
-                KUBECONFIG = credentials('config') // We retrieve kubeconfig from secret file called config saved on Jenkins
+                KUBECONFIG = credentials('config') 
+                DEPLOY_ENV = 'qa' 
             }
             steps {
                 script {
@@ -76,6 +97,7 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                    sed -i "s+nodePort:.*+nodePort: ${NODE_PORT}+g" values.yml
                     helm upgrade --install app-qa ./charts --values=values.yml --namespace qa
                     '''
                 }
@@ -84,7 +106,8 @@ pipeline {
 
         stage('Deploiement en staging') {
             environment {
-                KUBECONFIG = credentials('config') // We retrieve kubeconfig from secret file called config saved on Jenkins
+                KUBECONFIG = credentials('config') 
+                DEPLOY_ENV = 'staging' 
             }
             steps {
                 script {
@@ -96,6 +119,7 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                    sed -i "s+nodePort:.*+nodePort: ${NODE_PORT}+g" values.yml
                     helm upgrade --install app-staging ./charts --values=values.yml --namespace staging
                     '''
                 }
@@ -107,7 +131,8 @@ pipeline {
                 branch 'main'
             }
             environment {
-                KUBECONFIG = credentials('config') // We retrieve kubeconfig from secret file called config saved on Jenkins
+                KUBECONFIG = credentials('config') 
+                DEPLOY_ENV = 'prod' 
             }
             steps {
                 script {
@@ -119,7 +144,8 @@ pipeline {
                     cp charts/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app-staging ./charts --values=values.yml --namespace staging
+                    sed -i "s+nodePort:.*+nodePort: ${NODE_PORT}+g" values.yml
+                    helm upgrade --install app-prod ./charts --values=values.yml --namespace prod
                     '''
                 }
             }
